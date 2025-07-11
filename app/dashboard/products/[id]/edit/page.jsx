@@ -3,7 +3,7 @@ import { EditProductForm } from '@/components/dashboard/EditProductForm';
 
 async function getProductById(id) {
   // NOTE: In a real production app, this URL should be an environment variable.
-  const res = await fetch(`http://localhost:3000/api/products/${id}`, {
+  const res = await fetch(`https://sales-ten-jade.vercel.app/api/products/${id}`, {
     cache: 'no-store',
   });
 

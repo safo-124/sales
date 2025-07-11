@@ -13,7 +13,7 @@ import { ProductActions } from '@/components/dashboard/ProductActions'; // Impor
 // This server-side function fetches data from our API endpoint.
 async function getProducts() {
   // NOTE: In a real production app, this URL should be an environment variable.
-  const res = await fetch('http://localhost:3000/api/products', { 
+  const res = await fetch('https://sales-ten-jade.vercel.app/api/products', { 
     cache: 'no-store' // This ensures we always get the latest data.
   });
 
