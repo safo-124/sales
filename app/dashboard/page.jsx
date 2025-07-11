@@ -1,3 +1,4 @@
+// src/app/dashboard/page.jsx
 import Link from 'next/link';
 import {
   Card,
@@ -7,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ProductActions } from '@/components/dashboard/ProductActions'; // Import the new component
 
 // This server-side function fetches data from our API endpoint.
 async function getProducts() {
@@ -16,7 +18,6 @@ async function getProducts() {
   });
 
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary.
     throw new Error('Failed to fetch data');
   }
 
@@ -40,13 +41,15 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-            <Card key={product.id}>
-              <CardHeader>
+            <Card key={product.id} className="flex flex-col">
+              <CardHeader className="flex-grow">
                 <CardTitle>{product.name}</CardTitle>
                 <CardDescription>In Stock: {product.stock}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-semibold">GHS {product.price.toFixed(2)}</p>
+                <p className="text-2xl font-semibold mb-4">GHS {product.price.toFixed(2)}</p>
+                {/* Add the ProductActions component here */}
+                <ProductActions productId={product.id} />
               </CardContent>
             </Card>
           ))}
