@@ -1,20 +1,21 @@
 // src/components/layout/Sidebar.jsx
-'use client';
-
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Home, ShoppingCart, BarChart, Package } from 'lucide-react'; // Icon library
+import { NavLink } from './NavLink';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { SignOutButton } from './SignOutButton';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Package } from 'lucide-react';
 
+// Use simple strings for icons now
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/dashboard/sales/new', label: 'New Sale', icon: ShoppingCart },
-  { href: '/dashboard/sales', label: 'Sales History', icon: BarChart },
+  { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+  { href: '/dashboard/sales/new', label: 'New Sale', icon: 'cart' },
+  { href: '/dashboard/sales', label: 'Sales History', icon: 'chart' },
 ];
 
-export function Sidebar() {
-  const pathname = usePathname();
+export async function Sidebar() {
+  const session = await getServerSession(authOptions);
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
@@ -25,22 +26,26 @@ export function Sidebar() {
             <span>Sales App</span>
           </Link>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 overflow-auto py-2">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                  { 'bg-muted text-primary': pathname === link.href }
-                )}
-              >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Link>
+              <NavLink 
+                key={link.href} 
+                href={link.href} 
+                label={link.label} 
+                iconName={link.icon} // Pass the string name
+              />
             ))}
           </nav>
+        </div>
+        <div className="mt-auto p-4">
+          <Card>
+            <CardHeader className="p-2 pt-0 md:p-4">
+              <CardTitle>{session?.user?.name}</CardTitle>
+              <CardDescription>{session?.user?.role}</CardDescription>
+            </CardHeader>
+          </Card>
+          <SignOutButton />
         </div>
       </div>
     </div>

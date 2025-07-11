@@ -1,12 +1,69 @@
 // prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // You can change this to "mysql" or "sqlite" if you prefer
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ENUM for user roles
+enum Role {
+  OWNER
+  SALES_PERSON
+}
+
+// New User model
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For credentials login
+  role          Role      @default(SALES_PERSON)
+  accounts      Account[]
+  sessions      Session[]
+  sales         Sale[]    // A user can make many sales
+}
+
+// Required by NextAuth.js
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Required by NextAuth.js
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Required by NextAuth.js
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Product {
@@ -17,7 +74,7 @@ model Product {
   stock       Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  sales       SaleItem[]
+  saleItems   SaleItem[]
 }
 
 model Sale {
@@ -25,12 +82,15 @@ model Sale {
   total     Float
   createdAt DateTime   @default(now())
   saleItems SaleItem[]
+  // Link Sale to a User
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
 }
 
 model SaleItem {
   id        String  @id @default(cuid())
   quantity  Int
-  price     Float   // Price at the time of sale
+  price     Float
   sale      Sale    @relation(fields: [saleId], references: [id])
   saleId    String
   product   Product @relation(fields: [productId], references: [id])
