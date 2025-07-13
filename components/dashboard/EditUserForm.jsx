@@ -6,36 +6,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner"; // Import toast
-import { Loader2 } from "lucide-react"; // Import a loading spinner icon
 
-export default function NewUserPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('SALES_PERSON');
+export function EditUserForm({ user }) {
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [password, setPassword] = useState(''); // Leave empty unless changing
+  const [role, setRole] = useState(user.role);
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
 
-    const res = await fetch('/api/users', {
-      method: 'POST',
+    const res = await fetch(`/api/users/${user.id}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password: password || undefined, role }),
     });
-    
-    setIsLoading(false);
 
     if (res.ok) {
-      toast.success("User created successfully!");
       router.push('/dashboard/users');
       router.refresh();
     } else {
       const data = await res.json();
-      toast.error(data.message || 'Failed to create user.');
+      setError(data.message || 'Failed to update user.');
+      setIsLoading(false);
     }
   };
 
@@ -43,28 +41,28 @@ export default function NewUserPage() {
     <div className="flex justify-center items-center h-full p-8">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>Create New User</CardTitle>
-          <CardDescription>Create an account for a new sales person.</CardDescription>
+          <CardTitle>Edit User</CardTitle>
+          <CardDescription>Update the user's details below.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">Full Name</label>
+              <label htmlFor="name">Full Name</label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+              <label htmlFor="email">Email</label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <label htmlFor="password">New Password</label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Leave blank to keep current password" />
             </div>
-             <div>
-              <label htmlFor="role" className="block text-sm font-medium mb-1">Role</label>
+            <div>
+              <label htmlFor="role">Role</label>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="OWNER">Owner</SelectItem>
@@ -72,9 +70,9 @@ export default function NewUserPage() {
                 </SelectContent>
               </Select>
             </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Creating...' : 'Create User'}
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </form>
         </CardContent>

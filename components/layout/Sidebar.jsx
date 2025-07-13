@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SignOutButton } from './SignOutButton';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Package, Users } from 'lucide-react';
+import { Package, Users, Tag } from 'lucide-react'; // Import Tag icon
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: 'home' },
@@ -14,6 +14,7 @@ const navLinks = [
 
 const ownerLinks = [
   { href: '/dashboard/users', label: 'Manage Users', icon: 'users' },
+  { href: '/dashboard/categories', label: 'Manage Categories', icon: 'tag' }, // Add new link
 ];
 
 export async function Sidebar() {
@@ -39,7 +40,6 @@ export async function Sidebar() {
                 iconName={link.icon}
               />
             ))}
-            {/* Conditionally render owner links */}
             {userRole === 'OWNER' && ownerLinks.map((link) => (
                <NavLink 
                 key={link.href} 

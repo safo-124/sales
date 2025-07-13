@@ -1,4 +1,3 @@
-// src/app/layout.js
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -6,6 +5,7 @@ import Providers from "./providers";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";
+import { Toaster } from "@/components/ui/sonner"; // Import the Toaster
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,7 +15,6 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  // This line was missing. It fetches the session on the server.
   const session = await getServerSession(authOptions);
 
   return (
@@ -27,9 +26,9 @@ export default async function RootLayout({ children }) {
         )}
       >
         <Providers>
-          {/* Now the 'session' variable is defined and this check will work */}
           {session ? <MainLayout>{children}</MainLayout> : <>{children}</>}
         </Providers>
+        <Toaster richColors /> {/* Add the Toaster component here */}
       </body>
     </html>
   );

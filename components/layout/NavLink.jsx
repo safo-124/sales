@@ -3,19 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Home, ShoppingCart, BarChart, Users } from 'lucide-react'; // Add Users icon
+import { Home, ShoppingCart, BarChart, Users, Tag } from 'lucide-react'; // Add Tag icon
 
 // Create a map to link string names to icon components
 const iconMap = {
   home: Home,
   cart: ShoppingCart,
   chart: BarChart,
-  users: Users, // Add the new mapping
+  users: Users,
+  tag: Tag, // Add the new mapping
 };
 
 export function NavLink({ href, label, iconName }) {
   const pathname = usePathname();
-  const Icon = iconMap[iconName]; // Look up the component from the map
+  const Icon = iconMap[iconName];
 
   return (
     <Link
@@ -25,7 +26,7 @@ export function NavLink({ href, label, iconName }) {
         { 'bg-muted text-primary': pathname === href }
       )}
     >
-      {Icon && <Icon className="h-4 w-4" />} {/* Render the icon if it exists */}
+      {Icon && <Icon className="h-4 w-4" />}
       {label}
     </Link>
   );

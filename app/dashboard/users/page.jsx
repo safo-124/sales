@@ -19,12 +19,11 @@ import { Badge } from '@/components/ui/badge';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/db';
+import { UserActions } from '@/components/dashboard/UserActions'; // Import the new component
 
-// The database logic is now directly inside the server component
 export default async function UsersPage() {
   const session = await getServerSession(authOptions);
 
-  // Protect the page for owners only
   if (session?.user?.role !== 'OWNER') {
     return (
       <div className="p-8">
@@ -35,13 +34,10 @@ export default async function UsersPage() {
   }
 
   const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-    },
+    select: { id: true, name: true, email: true, role: true },
   });
+
+  const currentUserId = session.user.id;
 
   return (
     <div className="p-8">
@@ -66,6 +62,7 @@ export default async function UsersPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -77,6 +74,9 @@ export default async function UsersPage() {
                     <Badge variant={user.role === 'OWNER' ? 'default' : 'secondary'}>
                       {user.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <UserActions userId={user.id} currentUserId={currentUserId} />
                   </TableCell>
                 </TableRow>
               ))}
