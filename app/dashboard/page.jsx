@@ -37,13 +37,13 @@ export default async function DashboardPage({ searchParams }) {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
           <DashboardFilters />
       </div>
 
       {/* Statistic Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -76,7 +76,7 @@ export default async function DashboardPage({ searchParams }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 lg:grid-cols-7">
         {/* Sales Chart */}
         <Card className="lg:col-span-4">
           <CardHeader>

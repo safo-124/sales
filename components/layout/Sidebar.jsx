@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SignOutButton } from './SignOutButton';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Package, Users, Tag, Contact, ArrowDownUp } from 'lucide-react'; // Import new icon
+import { Package, Users, Tag, Contact, ArrowDownUp, FileText } from 'lucide-react'; // Import new icon
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: 'home' },
@@ -17,7 +17,8 @@ const navLinks = [
 const ownerLinks = [
   { href: '/dashboard/users', label: 'Manage Users', icon: 'users' },
   { href: '/dashboard/categories', label: 'Manage Categories', icon: 'tag' },
-  { href: '/dashboard/stock-intake', label: 'Stock Intake', icon: 'stock' }, // Add new link
+  { href: '/dashboard/stock-intake', label: 'Stock Intake', icon: 'stock' },
+  { href: '/dashboard/reports', label: 'Reports', icon: 'report' }, // Add new link
 ];
 
 export async function Sidebar() {

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Home, ShoppingCart, BarChart, Users, Tag, Package, Contact, ArrowDownUp } from 'lucide-react';
+import { Home, ShoppingCart, BarChart, Users, Tag, Package, Contact, ArrowDownUp, FileText } from 'lucide-react';
 
 const iconMap = {
   home: Home,
@@ -13,7 +13,8 @@ const iconMap = {
   contact: Contact,
   users: Users,
   tag: Tag,
-  stock: ArrowDownUp, // Add the new mapping
+  stock: ArrowDownUp,
+  report: FileText, // Add the new mapping
 };
 
 export function NavLink({ href, label, iconName }) {

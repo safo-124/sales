@@ -84,7 +84,7 @@ export function NewSaleForm({ products, customers }) {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <Card>
         <CardHeader>
           <CardTitle>Record a New Sale</CardTitle>
@@ -96,10 +96,9 @@ export function NewSaleForm({ products, customers }) {
                 placeholder="Search for a product..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="md:w-1/3"
               />
                <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
-                <SelectTrigger className="md:w-1/3">
+                <SelectTrigger>
                   <SelectValue placeholder="Select Customer (Optional)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -111,7 +110,7 @@ export function NewSaleForm({ products, customers }) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -131,8 +130,8 @@ export function NewSaleForm({ products, customers }) {
                 onChange={(e) => setQuantity(parseInt(e.target.value, 10) || 1)}
                 min="1"
               />
-              <Button onClick={handleAddItem}>Add to Sale</Button>
             </div>
+            <Button onClick={handleAddItem} className="w-full">Add to Sale</Button>
           </div>
           
           <div className="mt-6">
@@ -140,22 +139,23 @@ export function NewSaleForm({ products, customers }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Product</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead>Qty</TableHead>
                   <TableHead className="text-right">Subtotal</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead className="w-[20px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {saleItems.map(item => (
                   <TableRow key={item.productId}>
-                    <TableCell>{item.name}</TableCell>
+                    <TableCell>
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">GHS {item.price.toFixed(2)} ea.</p>
+                    </TableCell>
                     <TableCell>{item.quantity}</TableCell>
-                    <TableCell className="text-right">GHS {item.price.toFixed(2)}</TableCell>
                     <TableCell className="text-right">GHS {(item.price * item.quantity).toFixed(2)}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="destructive" size="sm" onClick={() => handleRemoveItem(item.productId)}>
-                        Remove
+                        X
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -164,9 +164,9 @@ export function NewSaleForm({ products, customers }) {
             </Table>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between items-center mt-6">
+        <CardFooter className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
           <h2 className="text-2xl font-bold">Total: GHS {total.toFixed(2)}</h2>
-          <Button onClick={handleRecordSale} disabled={isLoading || saleItems.length === 0} size="lg">
+          <Button onClick={handleRecordSale} disabled={isLoading || saleItems.length === 0} size="lg" className="w-full md:w-auto">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? 'Recording...' : 'Record Sale'}
           </Button>
