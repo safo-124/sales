@@ -1,21 +1,18 @@
 // src/app/dashboard/products/[id]/edit/page.jsx
+import prisma from '@/lib/db';
 import { EditProductForm } from '@/components/dashboard/EditProductForm';
 
-async function getProductById(id) {
-  // NOTE: In a real production app, this URL should be an environment variable.
-  const res = await fetch(`http://localhost:3000/api/products/${id}`, {
-    cache: 'no-store',
-  });
+export default async function EditProductPage({ params }) {
+  const [product, categories] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id: params.id },
+    }),
+    prisma.category.findMany(),
+  ]);
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch product data');
+  if (!product) {
+    return <p>Product not found.</p>;
   }
 
-  return res.json();
-}
-
-export default async function EditProductPage({ params }) {
-  const product = await getProductById(params.id);
-
-  return <EditProductForm product={product} />;
+  return <EditProductForm product={product} categories={categories} />;
 }

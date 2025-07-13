@@ -31,6 +31,7 @@ export async function PUT(request, { params }) {
         description: data.description,
         price: parseFloat(data.price),
         stock: parseInt(data.stock, 10),
+        categoryId: data.categoryId, // <-- Add this line
       },
     });
     return NextResponse.json(updatedProduct);

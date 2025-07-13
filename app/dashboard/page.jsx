@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -14,19 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { ProductActions } from '@/components/dashboard/ProductActions';
 import { DollarSign, Package, ShoppingCart } from 'lucide-react';
 import { SalesChart } from '@/components/dashboard/SalesChart';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]/route';
-import { Badge } from '@/components/ui/badge'; // Import the Badge component
-import { cn } from '@/lib/utils'; // Import the cn utility
 
-// Define the threshold for what's considered low stock
-const LOW_STOCK_THRESHOLD = 5;
-
-// Fetch all dashboard data
 async function getDashboardData() {
   const res = await fetch('http://localhost:3000/api/dashboard-stats', {
     cache: 'no-store'
@@ -35,23 +24,8 @@ async function getDashboardData() {
   return res.json();
 }
 
-// Fetch products
-async function getProducts() {
-  const res = await fetch('http://localhost:3000/api/products', {
-    cache: 'no-store'
-  });
-  if (!res.ok) throw new Error('Failed to fetch products');
-  return res.json();
-}
-
 export default async function DashboardPage() {
-  const [session, dashboardData, products] = await Promise.all([
-    getServerSession(authOptions),
-    getDashboardData(),
-    getProducts()
-  ]);
-
-  const userRole = session?.user?.role;
+  const dashboardData = await getDashboardData();
 
   return (
     <>
@@ -132,49 +106,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Products List */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Products</h1>
-        {userRole === 'OWNER' && (
-          <Link href="/dashboard/products/new">
-            <Button>Add New Product</Button>
-          </Link>
-        )}
-      </div>
-
-      {products.length === 0 ? (
-        <p>No products found. Add some to get started.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => {
-            const isLowStock = product.stock <= LOW_STOCK_THRESHOLD;
-            return (
-              <Card 
-                key={product.id} 
-                className={cn(
-                  "flex flex-col",
-                  isLowStock && "border-red-500" // Add red border if stock is low
-                )}
-              >
-                <CardHeader className="flex-grow">
-                  <div className="flex justify-between items-start">
-                    <CardTitle>{product.name}</CardTitle>
-                    {isLowStock && (
-                      <Badge variant="destructive">Low Stock</Badge> // Add badge if stock is low
-                    )}
-                  </div>
-                  <CardDescription>In Stock: {product.stock}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-semibold mb-4">GHS {product.price.toFixed(2)}</p>
-                  <ProductActions productId={product.id} userRole={userRole} />
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
     </>
   );
 }

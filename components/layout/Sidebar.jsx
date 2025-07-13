@@ -4,17 +4,18 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SignOutButton } from './SignOutButton';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Package, Users, Tag } from 'lucide-react'; // Import Tag icon
+import { Package, Users, Tag } from 'lucide-react'; // We can reuse the Package icon
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+  { href: '/dashboard/products', label: 'Products', icon: 'package' }, // Add new Products link
   { href: '/dashboard/sales/new', label: 'New Sale', icon: 'cart' },
   { href: '/dashboard/sales', label: 'Sales History', icon: 'chart' },
 ];
 
 const ownerLinks = [
   { href: '/dashboard/users', label: 'Manage Users', icon: 'users' },
-  { href: '/dashboard/categories', label: 'Manage Categories', icon: 'tag' }, // Add new link
+  { href: '/dashboard/categories', label: 'Manage Categories', icon: 'tag' },
 ];
 
 export async function Sidebar() {

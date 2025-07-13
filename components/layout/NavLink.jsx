@@ -3,15 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Home, ShoppingCart, BarChart, Users, Tag } from 'lucide-react'; // Add Tag icon
+import { Home, ShoppingCart, BarChart, Users, Tag, Package } from 'lucide-react'; // Add Package icon
 
-// Create a map to link string names to icon components
 const iconMap = {
   home: Home,
   cart: ShoppingCart,
   chart: BarChart,
   users: Users,
-  tag: Tag, // Add the new mapping
+  tag: Tag,
+  package: Package, // Add the new mapping
 };
 
 export function NavLink({ href, label, iconName }) {

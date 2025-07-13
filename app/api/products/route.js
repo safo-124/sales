@@ -24,7 +24,6 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    // Basic validation
     if (!data.name || !data.price || !data.stock) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
@@ -35,14 +34,12 @@ export async function POST(request) {
         description: data.description,
         price: parseFloat(data.price),
         stock: parseInt(data.stock, 10),
+        categoryId: data.categoryId, // <-- Add this line
       },
     });
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
     console.error("Failed to create product:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
