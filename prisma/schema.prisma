@@ -95,6 +95,9 @@ model Sale {
   // Link Sale to a User
   userId    String
   user      User       @relation(fields: [userId], references: [id])
+
+  customerId String?
+  customer   Customer?  @relation(fields: [customerId], references: [id])
 }
 
 model SaleItem {
@@ -105,4 +108,10 @@ model SaleItem {
   saleId    String
   product   Product @relation(fields: [productId], references: [id])
   productId String
+}
+model Customer {
+  id     String  @id @default(cuid())
+  name   String
+  phone  String? @unique
+  sales  Sale[]
 }

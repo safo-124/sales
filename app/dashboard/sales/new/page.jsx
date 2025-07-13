@@ -1,17 +1,25 @@
-// src/app/dashboard/sales/new/page.jsx
 import { NewSaleForm } from '@/components/dashboard/NewSaleForm';
+import prisma from '@/lib/db';
 
 async function getProducts() {
-  const res = await fetch('http://localhost:3000/api/products', {
-    cache: 'no-store',
+  const products = await prisma.product.findMany({
+    orderBy: { name: 'asc' },
   });
-  if (!res.ok) {
-    throw new Error('Failed to fetch products');
-  }
-  return res.json();
+  return products;
+}
+
+async function getCustomers() {
+  const customers = await prisma.customer.findMany({
+    orderBy: { name: 'asc' },
+  });
+  return customers;
 }
 
 export default async function NewSalePage() {
-  const products = await getProducts();
-  return <NewSaleForm products={products} />;
+  const [products, customers] = await Promise.all([
+    getProducts(),
+    getCustomers(),
+  ]);
+  
+  return <NewSaleForm products={products} customers={customers} />;
 }

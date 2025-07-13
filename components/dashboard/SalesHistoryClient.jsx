@@ -110,7 +110,8 @@ export function SalesHistoryClient({ initialSales, users }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>User</TableHead>
+            <TableHead>Customer</TableHead>
+            <TableHead>Sold By</TableHead>
             <TableHead>Date</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead className="w-[100px]">Items</TableHead>
@@ -120,7 +121,8 @@ export function SalesHistoryClient({ initialSales, users }) {
         <TableBody>
           {sales.map((sale) => (
             <TableRow key={sale.id}>
-              <TableCell className="font-medium">{sale.user.name}</TableCell>
+              <TableCell className="font-medium">{sale.customer?.name || 'N/A'}</TableCell>
+              <TableCell>{sale.user.name}</TableCell>
               <TableCell>{new Date(sale.createdAt).toLocaleDateString()}</TableCell>
               <TableCell className="text-right">GHS {sale.total.toFixed(2)}</TableCell>
               <TableCell>

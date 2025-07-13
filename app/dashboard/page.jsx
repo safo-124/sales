@@ -15,20 +15,33 @@ import {
 } from "@/components/ui/table";
 import { DollarSign, Package, ShoppingCart } from 'lucide-react';
 import { SalesChart } from '@/components/dashboard/SalesChart';
+import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 
-async function getDashboardData() {
-  const res = await fetch('http://localhost:3000/api/dashboard-stats', {
+async function getDashboardData({ from, to }) {
+  const params = new URLSearchParams();
+  if (from) params.set('startDate', from);
+  if (to) params.set('endDate', to);
+
+  const res = await fetch(`https://sales-ten-jade.vercel.app/api/dashboard-stats?${params.toString()}`, {
     cache: 'no-store'
   });
   if (!res.ok) throw new Error('Failed to fetch stats');
   return res.json();
 }
 
-export default async function DashboardPage() {
-  const dashboardData = await getDashboardData();
+export default async function DashboardPage({ searchParams }) {
+  const from = searchParams.from;
+  const to = searchParams.to;
+  
+  const dashboardData = await getDashboardData({ from, to });
 
   return (
     <>
+      <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <DashboardFilters />
+      </div>
+
       {/* Statistic Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -38,6 +51,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">GHS {dashboardData.totalRevenue.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">For the selected period</p>
           </CardContent>
         </Card>
         <Card>
@@ -47,6 +61,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+{dashboardData.totalSales}</div>
+            <p className="text-xs text-muted-foreground">For the selected period</p>
           </CardContent>
         </Card>
         <Card>
@@ -56,6 +71,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboardData.productCount}</div>
+            <p className="text-xs text-muted-foreground">Total products in inventory</p>
           </CardContent>
         </Card>
       </div>
@@ -64,10 +80,10 @@ export default async function DashboardPage() {
         {/* Sales Chart */}
         <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Sales Overview (Last 7 Days)</CardTitle>
+            <CardTitle>Sales Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <SalesChart />
+            <SalesChart from={from} to={to} />
           </CardContent>
         </Card>
 
@@ -76,7 +92,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Recent Sales</CardTitle>
             <CardDescription>
-              Your 5 most recent sales.
+              Your 5 most recent sales (all time).
             </CardDescription>
           </CardHeader>
           <CardContent>

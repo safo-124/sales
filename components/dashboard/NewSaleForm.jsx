@@ -7,22 +7,26 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { useDebounce } from 'use-debounce';
 
-export function NewSaleForm({ products }) {
+export function NewSaleForm({ products, customers }) {
   const [saleItems, setSaleItems] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(''); // State for the search query
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const router = useRouter();
 
-  // Filter products based on the search query
   const filteredProducts = useMemo(() => {
-    if (!searchQuery) return products;
+    if (!debouncedSearchQuery) return products;
     return products.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
     );
-  }, [searchQuery, products]);
+  }, [debouncedSearchQuery, products]);
 
   const handleAddItem = () => {
     const product = products.find(p => p.id === selectedProductId);
@@ -53,22 +57,29 @@ export function NewSaleForm({ products }) {
 
   const handleRecordSale = async () => {
     setIsLoading(true);
-    const res = await fetch('/api/sales', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        total: total,
-        saleItems: saleItems.map(({ name, ...item }) => item)
-      }),
-    });
+    try {
+      const res = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total: total,
+          saleItems: saleItems.map(({ name, ...item }) => item),
+          customerId: selectedCustomerId || null,
+        }),
+      });
 
-    if (res.ok) {
-      router.push('/dashboard/sales');
-      router.refresh();
-    } else {
-      const error = await res.json();
-      alert(`Failed to record sale: ${error.message}`);
-      setIsLoading(false);
+      if (res.ok) {
+        toast.success("Sale recorded successfully!");
+        router.push('/dashboard/sales');
+        router.refresh();
+      } else {
+        const error = await res.json();
+        toast.error(error.message || `Failed to record sale.`);
+      }
+    } catch (error) {
+        toast.error("An unexpected error occurred.");
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -80,19 +91,32 @@ export function NewSaleForm({ products }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Search Input */}
-            <Input
-              placeholder="Search for a product..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <div className="flex flex-col md:flex-row gap-4">
+              <Input
+                placeholder="Search for a product..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="md:w-1/3"
+              />
+               <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+                <SelectTrigger className="md:w-1/3">
+                  <SelectValue placeholder="Select Customer (Optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(customer => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Map over the filtered list of products */}
                   {filteredProducts.filter(p => p.stock > 0).map(product => (
                     <SelectItem key={product.id} value={product.id}>
                       {product.name} (Stock: {product.stock})
@@ -143,6 +167,7 @@ export function NewSaleForm({ products }) {
         <CardFooter className="flex justify-between items-center mt-6">
           <h2 className="text-2xl font-bold">Total: GHS {total.toFixed(2)}</h2>
           <Button onClick={handleRecordSale} disabled={isLoading || saleItems.length === 0} size="lg">
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? 'Recording...' : 'Record Sale'}
           </Button>
         </CardFooter>

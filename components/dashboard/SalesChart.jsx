@@ -1,17 +1,20 @@
-// src/components/dashboard/SalesChart.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
-export function SalesChart() {
+export function SalesChart({ from, to }) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch('/api/sales-chart')
+    const params = new URLSearchParams();
+    if (from) params.set('startDate', from);
+    if (to) params.set('endDate', to);
+    
+    fetch(`/api/sales-chart?${params.toString()}`)
       .then((res) => res.json())
       .then((chartData) => setData(chartData));
-  }, []);
+  }, [from, to]);
 
   return (
     <ResponsiveContainer width="100%" height={350}>

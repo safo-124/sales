@@ -34,11 +34,8 @@ export async function GET(request) {
             product: true,
           },
         },
-        user: { // Also include the user who made the sale
-          select: {
-            name: true,
-          }
-        }
+        user: { select: { name: true } },
+        customer: { select: { name: true } } // <-- Add this line
       },
     });
     return NextResponse.json(sales);
@@ -51,57 +48,43 @@ export async function GET(request) {
   }
 }
 
-
-// Replace your existing POST function with this one.
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const userId = session.user.id;
-    const { total, saleItems } = await request.json();
+    const { total, saleItems, customerId } = await request.json(); // <-- Get customerId from request
 
     if (!total || !saleItems || saleItems.length === 0) {
       return NextResponse.json({ message: "Missing required sale data" }, { status: 400 });
     }
 
     const newSale = await prisma.$transaction(async (tx) => {
-      // 1. Create the main Sale record, now including the userId
       const sale = await tx.sale.create({
         data: {
           total: parseFloat(total),
-          userId: userId, // <-- This is the required fix
+          userId: userId,
+          customerId: customerId, // <-- Add customerId here
         },
       });
 
-      // 2. Prepare stock updates
       const stockUpdates = saleItems.map(item => {
         return tx.product.update({
           where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: parseInt(item.quantity, 10),
-            },
-          },
+          data: { stock: { decrement: parseInt(item.quantity, 10) } },
         });
       });
-      
+
       const saleItemsWithSaleId = saleItems.map(item => ({
         ...item,
         saleId: sale.id,
       }));
 
-      // 3. Create the SaleItem records
-      await tx.saleItem.createMany({
-        data: saleItemsWithSaleId,
-      });
-
-      // 4. Execute all the stock updates
+      await tx.saleItem.createMany({ data: saleItemsWithSaleId });
       await Promise.all(stockUpdates);
-
       return sale;
     });
 
@@ -109,11 +92,8 @@ export async function POST(request) {
   } catch (error) {
     console.error("Failed to create sale:", error);
     if (error.code === 'P2025' || error.message.includes('decrement')) {
-       return NextResponse.json({ message: "Insufficient stock for one or more items." }, { status: 400 });
+      return NextResponse.json({ message: "Insufficient stock for one or more items." }, { status: 400 });
     }
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
