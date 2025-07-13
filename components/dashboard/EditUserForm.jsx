@@ -6,33 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export function EditUserForm({ user }) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
-  const [password, setPassword] = useState(''); // Leave empty unless changing
+  const [password, setPassword] = useState('');
   const [role, setRole] = useState(user.role);
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
-    const res = await fetch(`/api/users/${user.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password: password || undefined, role }),
-    });
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: password || undefined, role }),
+      });
 
-    if (res.ok) {
-      router.push('/dashboard/users');
-      router.refresh();
-    } else {
-      const data = await res.json();
-      setError(data.message || 'Failed to update user.');
+      if (res.ok) {
+        toast.success("User updated successfully!");
+        router.push('/dashboard/users');
+        router.refresh();
+      } else {
+        const data = await res.json();
+        toast.error(data.message || 'Failed to update user.');
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -70,8 +76,8 @@ export function EditUserForm({ user }) {
                 </SelectContent>
               </Select>
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </form>

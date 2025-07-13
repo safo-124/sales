@@ -17,19 +17,24 @@ export function EditCategoryForm({ category }) {
     e.preventDefault();
     setIsLoading(true);
 
-    const res = await fetch(`/api/categories/${category.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    });
+    try {
+      const res = await fetch(`/api/categories/${category.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
 
-    setIsLoading(false);
-    if (res.ok) {
-      toast.success('Category updated successfully!');
-      router.push('/dashboard/categories');
-      router.refresh();
-    } else {
-      toast.error('Failed to update category.');
+      if (res.ok) {
+        toast.success('Category updated successfully!');
+        router.push('/dashboard/categories');
+        router.refresh();
+      } else {
+        toast.error('Failed to update category.');
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

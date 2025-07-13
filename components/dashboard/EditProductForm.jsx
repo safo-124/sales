@@ -1,4 +1,3 @@
-// src/components/dashboard/EditProductForm.jsx
 'use client';
 
 import { useState } from 'react';
@@ -23,19 +22,24 @@ export function EditProductForm({ product, categories }) {
     e.preventDefault();
     setIsLoading(true);
 
-    const res = await fetch(`/api/products/${product.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, price, stock, description, categoryId }),
-    });
+    try {
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, price, stock, description, categoryId }),
+      });
 
-    setIsLoading(false);
-    if (res.ok) {
-      toast.success("Product updated successfully!");
-      router.push('/dashboard');
-      router.refresh();
-    } else {
-      toast.error("Failed to update product.");
+      if (res.ok) {
+        toast.success("Product updated successfully!");
+        router.push('/dashboard/products');
+        router.refresh();
+      } else {
+        toast.error("Failed to update product.");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
