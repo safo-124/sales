@@ -1,7 +1,6 @@
-// src/components/dashboard/NewSaleForm.jsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,21 +13,27 @@ export function NewSaleForm({ products }) {
   const [selectedProductId, setSelectedProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // State for the search query
   const router = useRouter();
+
+  // Filter products based on the search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery) return products;
+    return products.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, products]);
 
   const handleAddItem = () => {
     const product = products.find(p => p.id === selectedProductId);
     if (!product || quantity <= 0) return;
 
-    // Check if item is already in the list
     const existingItem = saleItems.find(item => item.productId === product.id);
     if (existingItem) {
-      // Update quantity if item already exists
-      setSaleItems(saleItems.map(item => 
+      setSaleItems(saleItems.map(item =>
         item.productId === product.id ? { ...item, quantity: item.quantity + quantity } : item
       ));
     } else {
-      // Add new item
       setSaleItems([...saleItems, {
         productId: product.id,
         name: product.name,
@@ -36,7 +41,6 @@ export function NewSaleForm({ products }) {
         quantity: quantity,
       }]);
     }
-    // Reset inputs
     setSelectedProductId('');
     setQuantity(1);
   };
@@ -54,12 +58,12 @@ export function NewSaleForm({ products }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         total: total,
-        saleItems: saleItems.map(({ name, ...item }) => item) // Exclude name field
+        saleItems: saleItems.map(({ name, ...item }) => item)
       }),
     });
 
     if (res.ok) {
-      router.push('/dashboard'); // Or a sales history page
+      router.push('/dashboard/sales');
       router.refresh();
     } else {
       const error = await res.json();
@@ -75,55 +79,66 @@ export function NewSaleForm({ products }) {
           <CardTitle>Record a New Sale</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a product" />
-              </SelectTrigger>
-              <SelectContent>
-                {products.filter(p => p.stock > 0).map(product => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name} (Stock: {product.stock})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            {/* Search Input */}
             <Input
-              type="number"
-              placeholder="Quantity"
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
-              min="1"
+              placeholder="Search for a product..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Button onClick={handleAddItem}>Add to Sale</Button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {/* Map over the filtered list of products */}
+                  {filteredProducts.filter(p => p.stock > 0).map(product => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name} (Stock: {product.stock})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                type="number"
+                placeholder="Quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value, 10) || 1)}
+                min="1"
+              />
+              <Button onClick={handleAddItem}>Add to Sale</Button>
+            </div>
           </div>
           
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right">Subtotal</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {saleItems.map(item => (
-                <TableRow key={item.productId}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell className="text-right">GHS {item.price.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">GHS {(item.price * item.quantity).toFixed(2)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="destructive" size="sm" onClick={() => handleRemoveItem(item.productId)}>
-                      Remove
-                    </Button>
-                  </TableCell>
+          <div className="mt-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead className="text-right">Subtotal</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {saleItems.map(item => (
+                  <TableRow key={item.productId}>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell className="text-right">GHS {item.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">GHS {(item.price * item.quantity).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="destructive" size="sm" onClick={() => handleRemoveItem(item.productId)}>
+                        Remove
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center mt-6">
           <h2 className="text-2xl font-bold">Total: GHS {total.toFixed(2)}</h2>

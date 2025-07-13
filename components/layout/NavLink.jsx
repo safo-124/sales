@@ -1,16 +1,16 @@
-// src/components/layout/NavLink.jsx
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Home, ShoppingCart, BarChart } from 'lucide-react';
+import { Home, ShoppingCart, BarChart, Users } from 'lucide-react'; // Add Users icon
 
 // Create a map to link string names to icon components
 const iconMap = {
   home: Home,
   cart: ShoppingCart,
   chart: BarChart,
+  users: Users, // Add the new mapping
 };
 
 export function NavLink({ href, label, iconName }) {

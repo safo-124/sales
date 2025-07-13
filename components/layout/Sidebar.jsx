@@ -1,24 +1,27 @@
-// src/components/layout/Sidebar.jsx
 import Link from 'next/link';
 import { NavLink } from './NavLink';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SignOutButton } from './SignOutButton';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Package } from 'lucide-react';
+import { Package, Users } from 'lucide-react';
 
-// Use simple strings for icons now
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: 'home' },
   { href: '/dashboard/sales/new', label: 'New Sale', icon: 'cart' },
   { href: '/dashboard/sales', label: 'Sales History', icon: 'chart' },
 ];
 
+const ownerLinks = [
+  { href: '/dashboard/users', label: 'Manage Users', icon: 'users' },
+];
+
 export async function Sidebar() {
   const session = await getServerSession(authOptions);
+  const userRole = session?.user?.role;
 
   return (
-    <div className="hidden border-r bg-muted/40 md:block">
+    <div className="hidden border-r bg-muted/40 md:block sidebar-to-hide">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
@@ -33,7 +36,16 @@ export async function Sidebar() {
                 key={link.href} 
                 href={link.href} 
                 label={link.label} 
-                iconName={link.icon} // Pass the string name
+                iconName={link.icon}
+              />
+            ))}
+            {/* Conditionally render owner links */}
+            {userRole === 'OWNER' && ownerLinks.map((link) => (
+               <NavLink 
+                key={link.href} 
+                href={link.href} 
+                label={link.label} 
+                iconName={link.icon}
               />
             ))}
           </nav>

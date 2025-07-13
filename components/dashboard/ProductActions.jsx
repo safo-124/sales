@@ -1,12 +1,16 @@
-// src/components/dashboard/ProductActions.jsx
 'use client';
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export function ProductActions({ productId }) {
+export function ProductActions({ productId, userRole }) {
   const router = useRouter();
+
+  // If the user is not an owner, render nothing.
+  if (userRole !== 'OWNER') {
+    return null;
+  }
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this product?')) {
@@ -17,7 +21,6 @@ export function ProductActions({ productId }) {
       method: 'DELETE',
     });
 
-    // Refresh the page to show the updated list
     router.refresh();
   };
 
